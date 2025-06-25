@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import random, string
 import smtplib
 from email.mime.text import MIMEText
+import traceback
 
 cred = credentials.Certificate("firebase_key.json")
 firebase_admin.initialize_app(cred)
@@ -73,6 +74,8 @@ def webhook():
 
         return jsonify({"status": "ok", "key": chave}), 200
     except Exception as e:
+        print("❌ Erro durante o webhook:")
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
