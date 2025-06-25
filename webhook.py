@@ -6,6 +6,7 @@ import random, string
 import smtplib
 from email.mime.text import MIMEText
 import traceback
+import os
 
 cred = credentials.Certificate("firebase_key.json")
 firebase_admin.initialize_app(cred)
@@ -54,6 +55,7 @@ def home():
 @app.route("/webhook-yampi", methods=["POST"])
 def webhook():
     data = request.json
+    print("Recebido webhook:", data)  # DEBUG para ver o payload no log
     try:
         email = data["customer"]["email"]
         plano = data["cart"]["items"][0]["name"].lower()
@@ -70,7 +72,7 @@ def webhook():
             "valid_until": validade
         })
 
-        enviar_email(email, chave)
+        enviar_email(email, chave)  # Comente esta linha se quiser testar sem enviar email
 
         return jsonify({"status": "ok", "key": chave}), 200
     except Exception as e:
@@ -79,4 +81,5 @@ def webhook():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
