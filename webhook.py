@@ -57,8 +57,20 @@ def webhook():
     data = request.json
     print("Recebido webhook:", data)  # DEBUG para ver o payload no log
     try:
-        email = data["customer"]["email"]
-        plano = data["cart"]["items"][0]["name"].lower()
+        resource = data.get("resource", {})
+        customer_data = resource.get("customer", {}).get("data", {})
+        items_data = resource.get("items", {}).get("data", [])
+
+        email = customer_data.get("email")
+        if not email:
+            raise ValueError("Email do cliente não encontrado no payload")
+
+        if not items_data:
+            raise ValueError("Itens do pedido não encontrados no payload")
+
+        primeiro_item = items_data[0]
+        sku_data = primeiro_item.get("sku", {}).get("data", {})
+        plano = sku_data.get("title", "").lower()
 
         chave = gerar_chave()
         validade = calcular_validade(plano)
